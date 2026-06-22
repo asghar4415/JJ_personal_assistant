@@ -1,0 +1,12 @@
+# JJ Configuration (JARVIS-inspired) - Development Environment
+# Override default.yaml with development settings
+
+debug: true
+
+whisper:
+  model: "tiny.en" # Use tiny model for faster iteration
+
+logging:
+  level: "DEBUG"
+  file: "./logs/jj.log"
+  console: true

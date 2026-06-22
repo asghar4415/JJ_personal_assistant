@@ -1,0 +1,16 @@
+# JJ Configuration (JARVIS-inspired) - Production Environment
+# Optimized for performance and stability
+
+debug: false
+
+whisper:
+  model: "tiny.en" # Balanced between speed and accuracy
+
+groq:
+  temperature: 0.5
+  max_tokens: 500
+
+logging:
+  level: "INFO"
+  file: "./logs/jj.log"
+  console: false

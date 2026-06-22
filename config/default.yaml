@@ -1,0 +1,39 @@
+# JJ Configuration (JARVIS-inspired) - Development Environment
+
+audio:
+  sample_rate: 16000
+  chunk_size: 1024
+  device: "default"
+
+porcupine:
+  wake_word: "Hey JJ"
+  sensitivity: 0.5
+
+whisper:
+  model: "tiny.en" # tiny.en, base, small
+  language: "en"
+  device: "cpu"
+
+groq:
+  model: "llama-3.1-8b-instant"
+  temperature: 0.7
+  max_tokens: 500
+
+memory:
+  db_path: "./data/jj_memory.db"
+  profile_path: "./data/user_profile.json"
+  max_history: 10
+  silence_threshold: 1.0
+
+tts:
+  engine: "pyttsx3" # pyttsx3 or elevenlabs
+  rate: 150 # words per minute
+
+vad:
+  silence_threshold: 1.0 # seconds of silence to detect speech end
+  confidence_threshold: 0.5
+
+logging:
+  level: "INFO"
+  file: "./logs/jarvis.log"
+  console: true

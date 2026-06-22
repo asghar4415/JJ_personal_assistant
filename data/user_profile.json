@@ -1,0 +1,48 @@
+{
+  "user_name": "Asghar Ali",
+  "user_bio": "FAST-NUCES Student, B.S. Computer Science 2026",
+  "background": "Final year computer science student at FAST-NUCES Karachi, interested in AI systems, software development, and content creation.",
+  "current_projects": [
+    {
+      "name": "Final Year Project (Jarvis)",
+      "status": "in_progress",
+      "deadline": "2026-06-20",
+      "description": "Building a personalized AI voice assistant with persistent memory and context awareness"
+    },
+    {
+      "name": "Personal Brand Development",
+      "status": "in_progress",
+      "description": "Building online presence and personal brand in tech"
+    },
+    {
+      "name": "Software Development Work",
+      "status": "active",
+      "description": "Various freelance and contract work"
+    }
+  ],
+  "work_context": [
+    "Full-time student",
+    "Part-time software developer",
+    "Content creator",
+    "Digital marketing work"
+  ],
+  "preferences": {
+    "response_style": "concise_with_context",
+    "communication_style": "professional_friendly",
+    "timezone": "PKT",
+    "language": "English"
+  },
+  "interests": [
+    "Artificial Intelligence",
+    "Systems Design",
+    "Backend Development",
+    "Automation",
+    "Voice Technology"
+  ],
+  "goals": [
+    "Build intelligent systems",
+    "Complete FYP successfully",
+    "Establish personal brand in tech",
+    "Master full-stack development"
+  ]
+}
