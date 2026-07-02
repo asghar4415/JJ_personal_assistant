@@ -9,9 +9,12 @@ from src.utils.logger import setup_logger
 from src.core.audio_engine import AudioEngine
 from src.core.speech_recognizer import SpeechRecognizer
 from src.core.text_synthesizer import TextSynthesizer
+from src.core.wake_word_detector import WakeWordDetector
+from src.core.voice_activity_detector import VoiceActivityDetector
 from src.llm.groq_client import GroqClient
 from src.llm.prompt_builder import PromptBuilder
 from src.pipeline.query_pipeline import QueryPipeline
+from src.pipeline.audio_pipeline import AudioPipeline
 from src.config import Config
 import sys
 import logging
@@ -31,6 +34,7 @@ class JJApplication:
         self.is_running = False
         self.components = {}
         self.pipeline = None
+        self.audio_pipeline = None
 
     def initialize(self):
         """Initialize all components"""
@@ -82,6 +86,21 @@ class JJApplication:
             logger.info("Initializing PromptBuilder...")
             self.components["prompt_builder"] = PromptBuilder()
 
+            # Phase 2: Initialize wake word detector and VAD
+            logger.info("Initializing WakeWordDetector...")
+            self.components["wake"] = WakeWordDetector(
+                keyword=Config.WAKE_WORD,
+                model_name=Config.WAKE_WORD_MODEL,
+                threshold=Config.WAKE_WORD_THRESHOLD,
+            )
+
+            logger.info("Initializing VoiceActivityDetector...")
+            self.components["vad"] = VoiceActivityDetector(
+                silence_seconds=Config.SILENCE_THRESHOLD,
+                sample_rate=Config.SAMPLE_RATE,
+                chunk_size=Config.CHUNK_SIZE,
+            )
+
             # Initialize QueryPipeline
             if self.components["llm"]:
                 logger.info("Initializing QueryPipeline...")
@@ -91,6 +110,14 @@ class JJApplication:
                     text_synthesizer=self.components["tts"],
                     groq_client=self.components["llm"],
                     prompt_builder=self.components["prompt_builder"],
+                )
+
+                logger.info("Initializing AudioPipeline (Phase 2)...")
+                self.audio_pipeline = AudioPipeline(
+                    audio_engine=self.components["audio"],
+                    wake_word_detector=self.components["wake"],
+                    vad=self.components["vad"],
+                    query_pipeline=self.pipeline,
                 )
 
             logger.info("All components initialized successfully!")
@@ -130,6 +157,8 @@ class JJApplication:
         print("  text query    - Process text query directly")
         print("  info          - Show system info")
         print("  devices       - List audio devices")
+        print("  listen        - Start Phase 2 continuous wake-word mode")
+        print("  p2status      - Show Phase 2 pipeline status")
         print("  q or quit     - Exit")
         print("="*60 + "\n")
 
@@ -151,6 +180,14 @@ class JJApplication:
 
                 elif user_input.lower() == 'devices':
                     self._show_devices()
+                    continue
+
+                elif user_input.lower() == 'listen':
+                    self._start_continuous_listening()
+                    continue
+
+                elif user_input.lower() == 'p2status':
+                    self._show_phase2_status()
                     continue
 
                 elif user_input == '':
@@ -293,6 +330,45 @@ class JJApplication:
             logger.error(f"Error listing devices: {e}")
             print(f"Error: {e}")
 
+    def _start_continuous_listening(self):
+        """Start Phase 2 continuous listening loop."""
+        if not self.audio_pipeline:
+            print("Phase 2 pipeline is not initialized.")
+            return
+
+        print("\nStarting Phase 2 continuous listening mode.")
+        print("Say wake word to trigger a query. Press Ctrl+C to return to menu.\n")
+
+        def on_event(message: str):
+            print(f"[P2] {message}")
+
+        try:
+            self.audio_pipeline.start_listening(on_event=on_event)
+        except KeyboardInterrupt:
+            self.audio_pipeline.stop()
+            print("\nExited continuous listening mode.")
+
+    def _show_phase2_status(self):
+        """Show Phase 2 component status."""
+        print("\n" + "="*50)
+        print("Phase 2 Status")
+        print("="*50)
+
+        if not self.audio_pipeline:
+            print("AudioPipeline: not initialized")
+            return
+
+        info = self.audio_pipeline.get_info()
+        print(f"Running: {info.get('running')}")
+        state = info.get("state", {})
+        print(f"State: {state.get('state')} ({state.get('message')})")
+
+        wake = info.get("wake_word", {})
+        print("Wake Word Detector:")
+        print(f"  enabled: {wake.get('enabled')}")
+        print(f"  backend: {wake.get('backend')}")
+        print(f"  keyword: {wake.get('keyword')}")
+
     def shutdown(self):
         """Shutdown the application gracefully"""
         logger.info("Shutting down JJ...")
@@ -300,6 +376,10 @@ class JJApplication:
 
         # Close components in reverse order
         try:
+            if "wake" in self.components and self.components["wake"]:
+                logger.info("Closing WakeWordDetector...")
+                self.components["wake"].close()
+
             if "audio" in self.components and self.components["audio"]:
                 logger.info("Closing AudioEngine...")
                 self.components["audio"].close()

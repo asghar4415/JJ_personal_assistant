@@ -10,6 +10,9 @@ numpy>=1.24.0
 # Speech Recognition
 openai-whisper>=20231105
 
+# Wake Word Detection (Phase 2)
+openwakeword>=0.6.0
+
 # LLM
 groq>=0.4.0
 
@@ -23,7 +26,6 @@ black>=23.0
 flake8>=6.0
 
 # Optional - Future phases
-# picovoice>=3.0          # Wake word detection
 # silero-vad>=5.0         # Voice activity detection
 # elevenlabs>=0.2         # Premium TTS
 # ollama>=0.1             # Local LLM (future)

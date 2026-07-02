@@ -36,9 +36,13 @@ class Config:
     CHUNK_SIZE = 1024
     AUDIO_DEVICE = os.getenv("AUDIO_DEVICE", "default")
 
-    # Porcupine (Wake Word)
+    # Wake Word (OpenWakeWord)
     WAKE_WORD = "Hey JJ"
-    PORCUPINE_SENSITIVITY = 0.5
+    WAKE_WORD_MODEL = os.getenv("WAKE_WORD_MODEL", "hey_mycroft")
+    WAKE_WORD_THRESHOLD = float(os.getenv("WAKE_WORD_THRESHOLD", "0.5"))
+
+    # Backward compatibility for previous code paths
+    PORCUPINE_SENSITIVITY = WAKE_WORD_THRESHOLD
 
     # Whisper (Speech Recognition)
     WHISPER_MODEL = "tiny.en"  # or "base", "small"
